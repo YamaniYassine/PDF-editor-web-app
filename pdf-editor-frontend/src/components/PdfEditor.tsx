@@ -9,7 +9,17 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString();
 
-interface TextItem { text: string; x: number; y: number; font_size: number; }
+interface TextItem {
+  text: string;
+  x: number;
+  y: number;
+  font_size: number;
+  width: number;
+  font_name: string;
+  is_bold: boolean;
+  is_italic: boolean;
+}
+
 
 export default function PdfEditor() {
   const [file, setFile] = useState<File | null>(null);
@@ -91,6 +101,10 @@ export default function PdfEditor() {
                 top: y,
                 left: x,
                 fontSize: it.font_size * scale,
+                width: it.width,
+                fontWeight: it.is_bold ? 'bold' : 'normal',
+                fontStyle: it.is_italic ? 'italic' : 'normal',
+                fontFamily: 'Helvetica, sans-serif', 
                 whiteSpace: 'nowrap',
                 cursor: 'text',
                 userSelect: 'text',
