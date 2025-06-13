@@ -5,12 +5,13 @@ import { saveAs } from 'file-saver';
 import * as pdfjsLib from 'pdfjs-dist/webpack.mjs';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
+  'pdfjs-dist/build/pdf.worker.min.mjs',
   import.meta.url
 ).toString();
 
 interface TextItem {
   text: string;
+  original_text: string;
   x: number;
   y: number;
   font_size: number;
@@ -25,11 +26,11 @@ export default function PdfEditor() {
   const [file, setFile] = useState<File | null>(null);
   const [textItems, setTextItems] = useState<TextItem[]>([]);
   const [pageHeight, setPageHeight] = useState(0);
+  const [activeEditIndex, setActiveEditIndex] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const scale = 1.5;
 
-  // 1️⃣ Upload & extract
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const pdf = e.target.files?.[0] ?? null;
     if (!pdf) return;
@@ -40,7 +41,6 @@ export default function PdfEditor() {
     setTextItems(resp.data.items);
   };
 
-  // 2️⃣ Render PDF & get page height
   useEffect(() => {
     if (!file) return;
     (async () => {
@@ -56,7 +56,6 @@ export default function PdfEditor() {
     })();
   }, [file]);
 
-  // 3️⃣ Edit & save
   const handleSave = async () => {
     if (!file) return;
     const form = new FormData();
@@ -75,45 +74,62 @@ export default function PdfEditor() {
   };
 
   return (
-    <div className="p-4 space-y-4" style={{ position: 'relative' }}>
+    <div className="p-4 space-y-4 relative">
       <input type="file" accept="application/pdf" onChange={handleFileChange} />
-      <div className="relative" style={{ position: 'relative', width: 'fit-content' }}>
+      <div className="relative" style={{ width: 'fit-content' }}>
         <canvas ref={canvasRef} className="border" />
         {textItems.map((it, i) => {
-          // Correct coordinate calculation
-          const offsetY = it.font_size * scale * 1.3; // fine-tune baseline difference
+          const offsetY = it.font_size * scale * 1.3;
           const x = it.x * scale;
           const y = pageHeight - (it.y * scale) - offsetY;
-
-          // Debug log to verify positions
-          console.log(
-            `Text[${i}] "${it.text}" → original x:${it.x}, y:${it.y} → scaled x:${x}, y:${y}`
-          );
+          const isEditing = activeEditIndex === i;
 
           return (
             <div
               key={i}
-              contentEditable
               suppressContentEditableWarning
-              onBlur={e => updateText(i, e.currentTarget.textContent || '')}
-              className="absolute bg-white bg-opacity-70 px-1"
+              contentEditable={isEditing}
+              onClick={() => setActiveEditIndex(i)}
+              onBlur={(e) => {
+                updateText(i, e.currentTarget.textContent || '');
+                setActiveEditIndex(null);
+              }}
+              className={`absolute transition-all duration-150`}
               style={{
                 top: y,
                 left: x,
                 fontSize: it.font_size * scale,
-                width: it.width,
+                width: it.width * scale,
                 fontWeight: it.is_bold ? 'bold' : 'normal',
                 fontStyle: it.is_italic ? 'italic' : 'normal',
-                fontFamily: 'Helvetica, sans-serif', 
+                fontFamily: 'Helvetica, sans-serif',
                 whiteSpace: 'nowrap',
-                cursor: 'text',
                 userSelect: 'text',
+                cursor: isEditing ? 'text' : 'pointer',
+                zIndex: isEditing ? 10 : 2,
+                opacity: isEditing ? 1 : 0,
+                backgroundColor: isEditing ? 'white' : 'transparent',
+                padding: isEditing ? '2px 4px' : 0,
+                pointerEvents: 'auto',
+              }}
+              onMouseEnter={(e) => {
+                if (!isEditing) {
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.9)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isEditing) {
+                  e.currentTarget.style.opacity = '0';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
               }}
             >
               {it.text}
             </div>
           );
         })}
+
       </div>
       <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded">
         Save PDF

@@ -12,7 +12,7 @@ app = FastAPI()
 # Allow frontend to connect
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or restrict to ["http://localhost:3000"]
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,8 +37,8 @@ class EditItem(BaseModel):
     font_size: float
 
 class ReplaceRequest(BaseModel):
-    buffer: str    # base64 encoded string, NOT bytes
-    edits: list    # adjust as needed
+    buffer: str    
+    edits: list    
 
 @app.post("/api/replace")
 async def replace(
@@ -46,7 +46,6 @@ async def replace(
     edits: str = Form(...)
 ):
     try:
-        # Load binary file content directly
         pdf_bytes = await file.read()
 
         # Parse edits from JSON string
