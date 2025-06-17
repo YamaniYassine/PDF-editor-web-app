@@ -21,13 +21,13 @@ interface TextItem {
   is_italic: boolean;
 }
 
-
 export default function PdfEditor() {
   const [file, setFile] = useState<File | null>(null);
   const [textItems, setTextItems] = useState<TextItem[]>([]);
   const [pageHeight, setPageHeight] = useState(0);
   const [activeEditIndex, setActiveEditIndex] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scale = 1.5;
 
@@ -61,12 +61,14 @@ export default function PdfEditor() {
     const form = new FormData();
     form.append('file', file);
     form.append('edits', JSON.stringify(textItems));
-    const resp = await axios.post('http://localhost:8000/api/replace', form, { responseType: 'blob' });
+    const resp = await axios.post('http://localhost:8000/api/replace', form, {
+      responseType: 'blob',
+    });
     saveAs(resp.data, 'edited.pdf');
   };
 
   const updateText = (idx: number, newText: string) => {
-    setTextItems(prev => {
+    setTextItems((prev) => {
       const arr = [...prev];
       arr[idx].text = newText;
       return arr;
@@ -74,66 +76,94 @@ export default function PdfEditor() {
   };
 
   return (
-    <div className="p-4 space-y-4 relative">
-      <input type="file" accept="application/pdf" onChange={handleFileChange} />
-      <div className="relative" style={{ width: 'fit-content' }}>
-        <canvas ref={canvasRef} className="border" />
-        {textItems.map((it, i) => {
-          const offsetY = it.font_size * scale * 1.3;
-          const x = it.x * scale;
-          const y = pageHeight - (it.y * scale) - offsetY;
-          const isEditing = activeEditIndex === i;
+    <div className="min-h-screen bg-gray-50 py-12 px-4 flex flex-col items-center space-y-10">
+      <h1 className="text-4xl font-bold text-gray-800 text-center">Edit Your PDF for Free</h1>
 
-          return (
-            <div
-              key={i}
-              suppressContentEditableWarning
-              contentEditable={isEditing}
-              onClick={() => setActiveEditIndex(i)}
-              onBlur={(e) => {
-                updateText(i, e.currentTarget.textContent || '');
-                setActiveEditIndex(null);
-              }}
-              className={`absolute transition-all duration-150`}
-              style={{
-                top: y,
-                left: x,
-                fontSize: it.font_size * scale,
-                width: it.width * scale,
-                fontWeight: it.is_bold ? 'bold' : 'normal',
-                fontStyle: it.is_italic ? 'italic' : 'normal',
-                fontFamily: 'Helvetica, sans-serif',
-                whiteSpace: 'nowrap',
-                userSelect: 'text',
-                cursor: isEditing ? 'text' : 'pointer',
-                zIndex: isEditing ? 10 : 2,
-                opacity: isEditing ? 1 : 0,
-                backgroundColor: isEditing ? 'white' : 'transparent',
-                padding: isEditing ? '2px 4px' : 0,
-                pointerEvents: 'auto',
-              }}
-              onMouseEnter={(e) => {
-                if (!isEditing) {
-                  e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.9)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isEditing) {
-                  e.currentTarget.style.opacity = '0';
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }
-              }}
-            >
-              {it.text}
-            </div>
-          );
-        })}
+      {/* Upload area */}
+      {!file && (
+        <div
+          className="w-full max-w-xl h-64 border-4 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-500 cursor-pointer hover:border-blue-500 hover:text-blue-500 transition"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <div className="text-5xl mb-2">+</div>
+          <p className="text-lg">Drop file here or click to upload</p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </div>
+      )}
 
-      </div>
-      <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded">
-        Save PDF
-      </button>
+      {/* PDF & Editor */}
+      {file && (
+        <div className="w-full max-w-4xl relative shadow-xl border border-gray-300 rounded overflow-hidden bg-white">
+          <div className="relative w-fit">
+            <canvas ref={canvasRef} className="block" />
+            {textItems.map((it, i) => {
+              const offsetY = it.font_size * scale * 1.3;
+              const x = it.x * scale;
+              const y = pageHeight - it.y * scale - offsetY;
+              const isEditing = activeEditIndex === i;
+
+              return (
+                <div
+                  key={i}
+                  suppressContentEditableWarning
+                  contentEditable={isEditing}
+                  onClick={() => setActiveEditIndex(i)}
+                  onBlur={(e) => {
+                    updateText(i, e.currentTarget.textContent || '');
+                    setActiveEditIndex(null);
+                  }}
+                  className="absolute transition-all duration-150"
+                  style={{
+                    top: y,
+                    left: x,
+                    fontSize: it.font_size * scale,
+                    width: it.width * scale,
+                    fontWeight: it.is_bold ? 'bold' : 'normal',
+                    fontStyle: it.is_italic ? 'italic' : 'normal',
+                    fontFamily: 'Helvetica, sans-serif',
+                    whiteSpace: 'nowrap',
+                    userSelect: 'text',
+                    cursor: isEditing ? 'text' : 'pointer',
+                    zIndex: isEditing ? 10 : 2,
+                    opacity: isEditing ? 1 : 0,
+                    backgroundColor: isEditing ? 'white' : 'transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isEditing) {
+                      e.currentTarget.style.opacity = '1';
+                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.9)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isEditing) {
+                      e.currentTarget.style.opacity = '0';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
+                  }}
+                >
+                  {it.text}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Save button */}
+      {file && (
+        <button
+          onClick={handleSave}
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+        >
+          Save Edited PDF
+        </button>
+      )}
     </div>
   );
 }
