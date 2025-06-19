@@ -8,6 +8,7 @@ import type { PDFDocumentProxy } from 'pdfjs-dist';
 import FileUploader from './FileUploader';
 import PDFCanvas from './PDFCanvas';
 import Pagination from './Pagination';
+import PageThumbnails from './PageThumbnails';
 import type { TextItem } from './types';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -28,7 +29,6 @@ export default function PdfEditor() {
 
   const handleFileSelect = async (pdfFile: File) => {
     setFile(pdfFile);
-
     const data = await pdfFile.arrayBuffer();
     const loadedPdf = await pdfjsLib.getDocument({ data }).promise;
     setPdf(loadedPdf);
@@ -67,32 +67,40 @@ export default function PdfEditor() {
       {!file && <FileUploader onFileSelect={handleFileSelect} />}
 
       {file && pdf && (
-        <>
-          <PDFCanvas
+        <div className="flex w-full gap-6 justify-center">
+          <div className="flex flex-col items-center">
+            <PDFCanvas
+              pdf={pdf}
+              currentPage={currentPage}
+              scale={scale}
+              textItems={textItems}
+              pageHeight={pageHeight}
+              setPageHeight={setPageHeight}
+              activeEditIndex={activeEditIndex}
+              setActiveEditIndex={setActiveEditIndex}
+              updateText={updateText}
+            />
+
+            <Pagination
+              currentPage={currentPage}
+              numPages={numPages}
+              setCurrentPage={setCurrentPage}
+            />
+
+            <button
+              onClick={handleSave}
+              className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+            >
+              Save Edited PDF
+            </button>
+          </div>
+
+          <PageThumbnails
             pdf={pdf}
             currentPage={currentPage}
-            scale={scale}
-            textItems={textItems}
-            pageHeight={pageHeight}
-            setPageHeight={setPageHeight}
-            activeEditIndex={activeEditIndex}
-            setActiveEditIndex={setActiveEditIndex}
-            updateText={updateText}
-          />
-
-          <Pagination
-            currentPage={currentPage}
-            numPages={numPages}
             setCurrentPage={setCurrentPage}
           />
-
-          <button
-            onClick={handleSave}
-            className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-          >
-            Save Edited PDF
-          </button>
-        </>
+        </div>
       )}
     </div>
   );
