@@ -67,7 +67,12 @@ export default function PdfEditor() {
       {!file && <FileUploader onFileSelect={handleFileSelect} />}
 
       {file && pdf && (
-        <div className="flex w-full gap-6 justify-center">
+        <div className="flex w-full gap-4 justify-center">
+          <PageThumbnails
+            pdf={pdf}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
           <div className="flex flex-col items-center">
             <PDFCanvas
               pdf={pdf}
@@ -94,12 +99,6 @@ export default function PdfEditor() {
               Save Edited PDF
             </button>
           </div>
-
-          <PageThumbnails
-            pdf={pdf}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-          />
         </div>
       )}
     </div>

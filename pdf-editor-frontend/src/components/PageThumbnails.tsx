@@ -33,7 +33,7 @@ export default function PageThumbnails({ pdf, currentPage, setCurrentPage }: Pag
   }, [pdf]);
 
   return (
-    <div className="flex flex-col gap-2 max-h-[80vh] overflow-y-auto p-2 border-l">
+    <div className="flex flex-col gap-2  overflow-y-auto pr-4 border-r">
       {thumbnails.map((src, idx) => {
         const pageNum = idx + 1;
         return (
