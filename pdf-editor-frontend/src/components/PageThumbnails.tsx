@@ -33,19 +33,21 @@ export default function PageThumbnails({ pdf, currentPage, setCurrentPage }: Pag
   }, [pdf]);
 
   return (
-    <div className="flex flex-col gap-2  overflow-y-auto pr-4 border-r">
+    <div className="flex flex-col gap-4 overflow-y-auto pr-4 border-r">
       {thumbnails.map((src, idx) => {
         const pageNum = idx + 1;
         return (
-          <img
-            key={pageNum}
-            src={src}
-            onClick={() => setCurrentPage(pageNum)}
-            className={`cursor-pointer border-2 rounded-md ${
-              pageNum === currentPage ? 'border-blue-600' : 'border-transparent'
-            } hover:border-blue-400 transition`}
-            alt={`Page ${pageNum}`}
-          />
+          <div key={pageNum} className="flex flex-col items-center gap-1">
+            <img
+              src={src}
+              onClick={() => setCurrentPage(pageNum)}
+              className={`cursor-pointer border-2 rounded-md ${
+                pageNum === currentPage ? 'border-blue-600' : 'border-transparent'
+              } hover:border-blue-400 transition`}
+              alt={`Page ${pageNum}`}
+            />
+            <div className="text-sm text-gray-600">Page {pageNum}</div>
+          </div>
         );
       })}
     </div>

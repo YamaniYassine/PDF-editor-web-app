@@ -1,9 +1,10 @@
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Response
 from typing import List, Dict
 import json
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from utils import extract_text_items, replace_text_and_generate
+from utils import extract_text_items, replace_text_and_generate, merge_pdfs_bytes
+import io
 
 app = FastAPI()
 
@@ -51,3 +52,18 @@ async def replace(
         raise HTTPException(status_code=500, detail=str(e))
 
     return Response(content=new_pdf, media_type="application/pdf")
+
+
+@app.post("/api/merge")
+async def merge_pdfs(files: List[UploadFile] = File(...)):
+    try:
+        file_bytes_list = [await file.read() for file in files]
+        merged_pdf_bytes = merge_pdfs_bytes(file_bytes_list)
+
+        return StreamingResponse(
+            io.BytesIO(merged_pdf_bytes),
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=merged.pdf"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

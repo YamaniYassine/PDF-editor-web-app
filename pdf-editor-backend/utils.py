@@ -1,5 +1,6 @@
 from typing import List, Dict
 import fitz  # PyMuPDF
+import io
 
 def extract_text_items(pdf_bytes: bytes) -> List[Dict]:
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
@@ -70,3 +71,16 @@ def replace_text_and_generate(pdf_bytes: bytes, edits: List[Dict]) -> bytes:
     new_pdf = doc.write()
     doc.close()
     return new_pdf
+
+def merge_pdfs_bytes(files: List[bytes]) -> bytes:
+    merged_pdf = fitz.open()
+
+    for file_bytes in files:
+        pdf = fitz.open(stream=file_bytes, filetype="pdf")
+        merged_pdf.insert_pdf(pdf)
+        pdf.close()
+
+    output_stream = io.BytesIO()
+    merged_pdf.save(output_stream)
+    merged_pdf.close()
+    return output_stream.getvalue()

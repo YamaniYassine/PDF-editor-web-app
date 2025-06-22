@@ -61,7 +61,7 @@ export default function PdfEditor() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 flex flex-col items-center space-y-10">
+    <div className="min-h-scree py-12 px-4 flex flex-col items-center space-y-10" style={{ marginTop: '5%' }}>
       <h1 className="text-4xl font-bold text-gray-800 text-center">Edit Your PDF for Free</h1>
 
       {!file && <FileUploader onFileSelect={handleFileSelect} />}
