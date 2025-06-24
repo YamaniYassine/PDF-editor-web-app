@@ -3,7 +3,7 @@ from typing import List, Dict
 import json
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from utils import extract_text_items, replace_text_and_generate, merge_pdfs_bytes
+from utils import extract_text_items, replace_text_and_generate, merge_pdfs_bytes, delete_pages_from_pdf
 import io
 
 app = FastAPI()
@@ -65,5 +65,25 @@ async def merge_pdfs(files: List[UploadFile] = File(...)):
             media_type="application/pdf",
             headers={"Content-Disposition": "attachment; filename=merged.pdf"}
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/delete-pages")
+async def delete_pages(
+    file: UploadFile = File(...),
+    pages_to_delete: str = Form(...)
+):
+    try:
+        pdf_bytes = await file.read()
+        pages_to_delete_list = json.loads(pages_to_delete)
+        cleaned_pdf_bytes = delete_pages_from_pdf(pdf_bytes, pages_to_delete_list)
+
+        return StreamingResponse(
+            io.BytesIO(cleaned_pdf_bytes),
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=cleaned.pdf"}
+        )
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

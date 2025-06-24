@@ -10,8 +10,8 @@ export default function Navbar() {
       
       <div className="flex space-x-8 text-gray-600 font-medium">
         <Link href="/edit" className="hover:text-gray-800 hover:font-bold transition">Edit</Link>
-        <Link href="/merge" className="hover:text-black transition">Merge</Link>
-        <a href="#delete" className="hover:text-gray-800 hover:font-bold transition">Delete Pages</a>
+        <Link href="/merge" className="hover:text-gray-800 hover:font-bold transition">Merge</Link>
+        <Link href="/delete" className="hover:text-gray-800 hover:font-bold transition">Delete Pages</Link>
         <a href="#compress" className="hover:text-gray-800 hover:font-bold transition">Compress</a>
       </div>
     </nav>

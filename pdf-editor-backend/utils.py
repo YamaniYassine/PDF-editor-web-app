@@ -84,3 +84,15 @@ def merge_pdfs_bytes(files: List[bytes]) -> bytes:
     merged_pdf.save(output_stream)
     merged_pdf.close()
     return output_stream.getvalue()
+
+def delete_pages_from_pdf(pdf_bytes: bytes, pages_to_delete: List[int]) -> bytes:
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+
+    for index in sorted(pages_to_delete, reverse=True):
+        if 0 <= index < len(doc):
+            doc.delete_page(index)
+
+    output_stream = io.BytesIO()
+    doc.save(output_stream)
+    doc.close()
+    return output_stream.getvalue()

@@ -6,9 +6,17 @@ interface PageThumbnailsProps {
   pdf: PDFDocumentProxy;
   currentPage: number;
   setCurrentPage: (page: number) => void;
+  renderBelow?: (pageNumber: number) => React.ReactNode;
+  containerClassName?: string;
 }
 
-export default function PageThumbnails({ pdf, currentPage, setCurrentPage }: PageThumbnailsProps) {
+export default function PageThumbnails({
+  pdf,
+  currentPage,
+  setCurrentPage,
+  renderBelow,
+  containerClassName,
+}: PageThumbnailsProps) {
   const [thumbnails, setThumbnails] = useState<string[]>([]);
 
   useEffect(() => {
@@ -33,7 +41,7 @@ export default function PageThumbnails({ pdf, currentPage, setCurrentPage }: Pag
   }, [pdf]);
 
   return (
-    <div className="flex flex-col gap-4 overflow-y-auto pr-4 border-r">
+    <div className={`flex gap-4 overflow-y-auto pr-4 ${containerClassName ?? 'flex-col border-r'}`}>
       {thumbnails.map((src, idx) => {
         const pageNum = idx + 1;
         return (
@@ -47,6 +55,7 @@ export default function PageThumbnails({ pdf, currentPage, setCurrentPage }: Pag
               alt={`Page ${pageNum}`}
             />
             <div className="text-sm text-gray-600">Page {pageNum}</div>
+            {renderBelow && renderBelow(pageNum)}
           </div>
         );
       })}
