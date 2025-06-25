@@ -1,6 +1,9 @@
 from typing import List, Dict
 import fitz  # PyMuPDF
 import io
+import subprocess
+import tempfile
+
 
 def extract_text_items(pdf_bytes: bytes) -> List[Dict]:
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
@@ -96,3 +99,25 @@ def delete_pages_from_pdf(pdf_bytes: bytes, pages_to_delete: List[int]) -> bytes
     doc.save(output_stream)
     doc.close()
     return output_stream.getvalue()
+
+
+def compress_pdf_with_qpdf(pdf_bytes: bytes) -> bytes:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as input_file, \
+         tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as output_file:
+
+        input_file.write(pdf_bytes)
+        input_file.flush()
+
+        # Run qpdf with compression options
+        subprocess.run([
+            "qpdf",
+            "--object-streams=generate",
+            "--stream-data=compress",
+            "--linearize",
+            input_file.name,
+            output_file.name
+        ], check=True)
+
+        # Read compressed result
+        with open(output_file.name, 'rb') as f:
+            return f.read()

@@ -3,7 +3,7 @@ from typing import List, Dict
 import json
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from utils import extract_text_items, replace_text_and_generate, merge_pdfs_bytes, delete_pages_from_pdf
+from utils import extract_text_items, replace_text_and_generate, merge_pdfs_bytes, delete_pages_from_pdf, compress_pdf_with_qpdf
 import io
 
 app = FastAPI()
@@ -91,3 +91,17 @@ async def delete_pages(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.post("/api/compress")
+async def compress_pdf(file: UploadFile = File(...)):
+    try:
+        pdf_bytes = await file.read()
+        compressed_pdf_bytes = compress_pdf_with_qpdf(pdf_bytes)
+
+        return StreamingResponse(
+            io.BytesIO(compressed_pdf_bytes),
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=compressed.pdf"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

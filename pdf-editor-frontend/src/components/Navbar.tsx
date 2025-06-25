@@ -12,7 +12,7 @@ export default function Navbar() {
         <Link href="/edit" className="hover:text-gray-800 hover:font-bold transition">Edit</Link>
         <Link href="/merge" className="hover:text-gray-800 hover:font-bold transition">Merge</Link>
         <Link href="/delete" className="hover:text-gray-800 hover:font-bold transition">Delete Pages</Link>
-        <a href="#compress" className="hover:text-gray-800 hover:font-bold transition">Compress</a>
+        <Link href="/compress" className="hover:text-gray-800 hover:font-bold transition">Compress</Link>
       </div>
     </nav>
   );
