@@ -1,8 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
-import * as pdfjsLib from 'pdfjs-dist/webpack.mjs';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 
 import FileUploader from './FileUploader';
@@ -10,11 +9,6 @@ import PDFCanvas from './PDFCanvas';
 import Pagination from './Pagination';
 import PageThumbnails from './PageThumbnails';
 import type { TextItem } from './types';
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url
-).toString();
 
 export default function PdfEditor() {
   const [file, setFile] = useState<File | null>(null);
@@ -24,13 +18,31 @@ export default function PdfEditor() {
   const [textItems, setTextItems] = useState<TextItem[]>([]);
   const [pageHeight, setPageHeight] = useState(0);
   const [activeEditIndex, setActiveEditIndex] = useState<number | null>(null);
+  const pdfjsLibRef = useRef<any>(null);
 
   const scale = 1.5;
 
-  const handleFileSelect = async (pdfFile: File) => {
+  useEffect(() => {
+    const loadPdfJs = async () => {
+      const pdfjsLib = await import('pdfjs-dist/webpack.mjs');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+        'pdfjs-dist/build/pdf.worker.min.mjs',
+        import.meta.url
+      ).toString();
+      pdfjsLibRef.current = pdfjsLib;
+    };
+
+    loadPdfJs();
+  }, []);
+
+  const handleFileSelect = async (pdfFileOrFiles: File | File[]) => {
+    const pdfFile = Array.isArray(pdfFileOrFiles) ? pdfFileOrFiles[0] : pdfFileOrFiles;
     setFile(pdfFile);
     const data = await pdfFile.arrayBuffer();
-    const loadedPdf = await pdfjsLib.getDocument({ data }).promise;
+
+    if (!pdfjsLibRef.current) return;
+
+    const loadedPdf = await pdfjsLibRef.current.getDocument({ data }).promise;
     setPdf(loadedPdf);
     setNumPages(loadedPdf.numPages);
     setCurrentPage(1);
@@ -61,7 +73,7 @@ export default function PdfEditor() {
   };
 
   return (
-    <div className="min-h-scree py-12 px-4 flex flex-col items-center space-y-10" style={{ marginTop: '5%' }}>
+    <div className="min-h-screen py-12 px-4 flex flex-col items-center space-y-10" style={{ marginTop: '5%' }}>
       <h1 className="text-4xl font-bold text-gray-800 text-center">Edit Your PDF for Free</h1>
 
       {!file && <FileUploader onFileSelect={handleFileSelect} />}

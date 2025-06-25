@@ -1,10 +1,11 @@
 import React from 'react';
 
 interface FileUploaderProps {
-  onFileSelect: (file: File) => void;
+  onFileSelect: (file: File | File[]) => void;
+  multiple?: boolean;
 }
 
-export default function FileUploader({ onFileSelect }: FileUploaderProps) {
+export default function FileUploader({ onFileSelect, multiple = false }: FileUploaderProps) {
   return (
     <div
       className="w-full max-w-xl h-64 border-4 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-500 cursor-pointer hover:border-blue-500 hover:text-blue-500 transition"
@@ -16,9 +17,12 @@ export default function FileUploader({ onFileSelect }: FileUploaderProps) {
         id="fileInput"
         type="file"
         accept="application/pdf"
+        multiple={multiple}
         onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) onFileSelect(file);
+          const inputFiles = e.target.files;
+          if (inputFiles) {
+            onFileSelect(multiple ? Array.from(inputFiles) : inputFiles[0]);
+          }
         }}
         className="hidden"
       />

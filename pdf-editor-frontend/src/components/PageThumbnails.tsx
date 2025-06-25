@@ -8,6 +8,7 @@ interface PageThumbnailsProps {
   setCurrentPage: (page: number) => void;
   renderBelow?: (pageNumber: number) => React.ReactNode;
   containerClassName?: string;
+  limitPages?: number;
 }
 
 export default function PageThumbnails({
@@ -16,6 +17,7 @@ export default function PageThumbnails({
   setCurrentPage,
   renderBelow,
   containerClassName,
+  limitPages,
 }: PageThumbnailsProps) {
   const [thumbnails, setThumbnails] = useState<string[]>([]);
 
@@ -23,7 +25,7 @@ export default function PageThumbnails({
     const generateThumbnails = async () => {
       const thumbs: string[] = [];
 
-      for (let i = 1; i <= pdf.numPages; i++) {
+      for (let i = 1; i <= Math.min(pdf.numPages, limitPages ?? pdf.numPages); i++) {
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 0.3 });
         const canvas = document.createElement('canvas');
@@ -54,7 +56,9 @@ export default function PageThumbnails({
               } hover:border-blue-400 transition`}
               alt={`Page ${pageNum}`}
             />
-            <div className="text-sm text-gray-600">Page {pageNum}</div>
+            {!limitPages && (
+              <div className="text-sm text-gray-600">Page {pageNum}</div>
+            )}
             {renderBelow && renderBelow(pageNum)}
           </div>
         );

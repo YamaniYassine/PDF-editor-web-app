@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import * as pdfjsLib from 'pdfjs-dist/webpack.mjs';
+import { useEffect, useRef, useState } from 'react';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
@@ -9,21 +8,31 @@ import { saveAs } from 'file-saver';
 import FileUploader from './FileUploader';
 import PageThumbnails from './PageThumbnails';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url
-).toString();
-
 export default function PdfDeleter() {
   const [file, setFile] = useState<File | null>(null);
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagesToDelete, setPagesToDelete] = useState<number[]>([]);
+  const pdfjsLibRef = useRef<any>(null);
 
-  const handleFileSelect = async (pdfFile: File) => {
+  useEffect(() => {
+    const loadPdfJs = async () => {
+      const pdfjsLib = await import('pdfjs-dist/webpack.mjs');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+        'pdfjs-dist/build/pdf.worker.min.mjs',
+        import.meta.url
+      ).toString();
+      pdfjsLibRef.current = pdfjsLib;
+    };
+
+    loadPdfJs();
+  }, []);
+
+  const handleFileSelect = async (pdfFileOrFiles: File | File[]) => {
+    const pdfFile = Array.isArray(pdfFileOrFiles) ? pdfFileOrFiles[0] : pdfFileOrFiles;
     setFile(pdfFile);
     const data = await pdfFile.arrayBuffer();
-    const loadedPdf = await pdfjsLib.getDocument({ data }).promise;
+    const loadedPdf = await pdfjsLibRef.current.getDocument({ data }).promise;
     setPdf(loadedPdf);
     setCurrentPage(1);
   };
@@ -40,9 +49,9 @@ export default function PdfDeleter() {
     if (!file || !pagesToDelete.length) return;
     const form = new FormData();
     form.append('file', file);
-    form.append('pages', JSON.stringify(pagesToDelete));
+    form.append('pages_to_delete', JSON.stringify(pagesToDelete));
 
-    const resp = await axios.post('http://localhost:8000/api/delete', form, {
+    const resp = await axios.post('http://localhost:8000/api/delete-pages', form, {
       responseType: 'blob',
     });
 

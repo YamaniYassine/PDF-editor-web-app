@@ -1,56 +1,104 @@
 'use client';
-import React, { useState } from 'react';
+
+import React, { useEffect, useRef, useState } from 'react';
+import type { PDFDocumentProxy } from 'pdfjs-dist';
 import axios from 'axios';
+import { saveAs } from 'file-saver';
+
+import FileUploader from './FileUploader';
+import PageThumbnails from './PageThumbnails';
 
 export default function PdfMerger() {
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [pdfs, setPdfs] = useState<PDFDocumentProxy[]>([]);
+  const pdfjsLibRef = useRef<any>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFiles(e.target.files);
+  useEffect(() => {
+    const loadPdfJs = async () => {
+      const pdfjsLib = await import('pdfjs-dist/webpack.mjs');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+        'pdfjs-dist/build/pdf.worker.min.mjs',
+        import.meta.url
+      ).toString();
+      pdfjsLibRef.current = pdfjsLib;
+    };
+
+    loadPdfJs();
+  }, []);
+
+  const handleFilesSelect = async (newFiles: File | File[]) => {
+    const selectedFiles = Array.isArray(newFiles) ? newFiles : [newFiles];
+
+    const loadedPdfs: PDFDocumentProxy[] = [];
+    for (const file of selectedFiles) {
+      const data = await file.arrayBuffer();
+      const pdf = await pdfjsLibRef.current.getDocument({ data }).promise;
+      loadedPdfs.push(pdf);
+    }
+
+    setFiles((prev) => [...prev, ...selectedFiles]);
+    setPdfs((prev) => [...prev, ...loadedPdfs]);
   };
 
   const handleMerge = async () => {
-    if (!files || files.length < 2) return;
+    if (files.length < 2) return;
 
     const form = new FormData();
-    Array.from(files).forEach((file) => form.append('files', file));
+    files.forEach((file) => form.append('files', file));
 
     try {
       const response = await axios.post('http://localhost:8000/api/merge', form, {
         responseType: 'blob',
       });
 
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'merged.pdf';
-      link.click();
+      saveAs(response.data, 'merged.pdf');
     } catch (error) {
       console.error('Merge failed:', error);
       alert('Failed to merge PDFs');
     }
   };
 
+  const canMerge = files.length >= 2;
+
   return (
-    <div className="min-h-screen py-20 px-6 flex flex-col items-center space-y-8">
+    <div className="min-h-screen py-12 px-4 flex flex-col items-center space-y-10" style={{ marginTop: '5%' }}>
       <h1 className="text-4xl font-bold text-gray-800 text-center">Merge PDF Files</h1>
 
-      <input
-        type="file"
-        multiple
-        accept="application/pdf"
-        onChange={handleFileChange}
-        className="text-center"
-      />
+        <FileUploader onFileSelect={handleFilesSelect} multiple />
 
-      
-        <button
-            onClick={handleMerge}
-            className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+      {pdfs.length > 0 && (
+        <div className="w-full flex flex-col items-center space-y-6">
+          <div className="flex flex-wrap justify-center gap-6 max-w-full overflow-x-auto">
+            {pdfs.map((pdf, idx) => (
+              <div key={idx} className="flex flex-col items-center gap-2">
+                <h3 className="text-sm font-semibold text-gray-600">PDF {idx + 1}</h3>
+                <PageThumbnails
+                  pdf={pdf}
+                  currentPage={1}
+                  setCurrentPage={() => {}}
+                  containerClassName="flex-col"
+                  limitPages={1}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div title={!canMerge ? 'Please upload at least 2 PDF files to merge' : ''}>
+            <button
+              onClick={handleMerge}
+              disabled={!canMerge}
+              className={`mt-6 px-6 py-3 rounded-lg shadow transition ${
+                canMerge
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
             >
-            Merge PDF files
-        </button>
+              Merge PDF Files
+            </button>
+          </div>
+
+        </div>
+      )}
     </div>
   );
 }

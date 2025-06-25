@@ -77,7 +77,10 @@ async def delete_pages(
     try:
         pdf_bytes = await file.read()
         pages_to_delete_list = json.loads(pages_to_delete)
-        cleaned_pdf_bytes = delete_pages_from_pdf(pdf_bytes, pages_to_delete_list)
+
+        zero_based_pages = [p - 1 for p in pages_to_delete_list if p > 0]
+
+        cleaned_pdf_bytes = delete_pages_from_pdf(pdf_bytes, zero_based_pages)
 
         return StreamingResponse(
             io.BytesIO(cleaned_pdf_bytes),
@@ -87,3 +90,4 @@ async def delete_pages(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
