@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export default function Hero() {
   return (
@@ -11,9 +12,11 @@ export default function Hero() {
           Easy, pleasant and productive PDF editor
         </p>
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+        <Link href="/edit">
           <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-md shadow">
             Edit a PDF document – it's free
           </button>
+        </Link>
         </div>
       </div>
     </div>
