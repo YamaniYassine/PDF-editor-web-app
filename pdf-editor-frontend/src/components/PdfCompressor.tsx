@@ -13,7 +13,6 @@ export default function PdfCompressor() {
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const pdfjsLibRef = useRef<any>(null);
 
-
   useEffect(() => {
     const loadPdfJs = async () => {
       const pdfjsLib = await import('pdfjs-dist/webpack.mjs');
@@ -52,29 +51,33 @@ export default function PdfCompressor() {
   };
 
   return (
-    <div className="min-h-screen py-12 px-4 flex flex-col items-center space-y-10" style={{ marginTop: '5%' }}>
-      <h1 className="text-4xl font-bold text-gray-800 text-center">Compress Your PDF</h1>
+    <section className="min-h-screen py-16 px-4 bg-gray-50" style={{ paddingTop: '7%' }}>
+      <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
+        <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 text-center">
+          Compress Your PDF
+        </h1>
 
-      {!file && <FileUploader onFileSelect={handleFileSelect} />}
+        {!file && <FileUploader onFileSelect={handleFileSelect} />}
 
-      {file && pdf && (
-        <div className="flex flex-col items-center gap-6 w-full max-w-4xl">
-          <PageThumbnails
-            pdf={pdf}
-            currentPage={1}
-            setCurrentPage={() => {}}
-            containerClassName="flex-col"
-            limitPages={1}
-          />
+        {file && pdf && (
+          <div className="flex flex-col items-center gap-8 w-full max-w-4xl">
+            <PageThumbnails
+              pdf={pdf}
+              currentPage={1}
+              setCurrentPage={() => {}}
+              containerClassName="flex-col"
+              limitPages={1}
+            />
 
-          <button
-            onClick={handleCompress}
-            className="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
-          >
-            Compress PDF
-          </button>
-        </div>
-      )}
-    </div>
+            <button
+              onClick={handleCompress}
+              className="px-8 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition font-semibold"
+            >
+              Compress PDF
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

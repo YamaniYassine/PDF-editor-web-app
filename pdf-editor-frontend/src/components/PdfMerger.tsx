@@ -61,44 +61,49 @@ export default function PdfMerger() {
   const canMerge = files.length >= 2;
 
   return (
-    <div className="min-h-screen py-12 px-4 flex flex-col items-center space-y-10" style={{ marginTop: '5%' }}>
-      <h1 className="text-4xl font-bold text-gray-800 text-center">Merge PDF Files</h1>
+    <section className="min-h-screen py-16 px-4 bg-gray-50" style={{ paddingTop: '7%' }}>
+      <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
+        <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 text-center">
+          Merge PDF Files
+        </h1>
 
         <FileUploader onFileSelect={handleFilesSelect} multiple />
 
-      {pdfs.length > 0 && (
-        <div className="w-full flex flex-col items-center space-y-6">
-          <div className="flex flex-wrap justify-center gap-6 max-w-full overflow-x-auto">
-            {pdfs.map((pdf, idx) => (
-              <div key={idx} className="flex flex-col items-center gap-2">
-                <h3 className="text-sm font-semibold text-gray-600">PDF {idx + 1}</h3>
-                <PageThumbnails
-                  pdf={pdf}
-                  currentPage={1}
-                  setCurrentPage={() => {}}
-                  containerClassName="flex-col"
-                  limitPages={1}
-                />
-              </div>
-            ))}
-          </div>
+        {pdfs.length > 0 && (
+          <div className="w-full flex flex-col items-center space-y-8">
+            <div className="flex flex-wrap justify-center gap-6 w-full max-w-full overflow-x-auto">
+              {pdfs.map((pdf, idx) => (
+                <div key={idx} className="flex flex-col items-center gap-2">
+                  <h3 className="text-sm font-semibold text-gray-600">PDF {idx + 1}</h3>
+                  <PageThumbnails
+                    pdf={pdf}
+                    currentPage={1}
+                    setCurrentPage={() => {}}
+                    containerClassName="flex-col"
+                    limitPages={1}
+                  />
+                </div>
+              ))}
+            </div>
 
-          <div title={!canMerge ? 'Please upload at least 2 PDF files to merge' : ''}>
-            <button
-              onClick={handleMerge}
-              disabled={!canMerge}
-              className={`mt-6 px-6 py-3 rounded-lg shadow transition ${
-                canMerge
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+            <div
+              title={!canMerge ? 'Please upload at least 2 PDF files to merge' : ''}
             >
-              Merge PDF Files
-            </button>
+              <button
+                onClick={handleMerge}
+                disabled={!canMerge}
+                className={`mt-4 px-8 py-3 rounded-lg shadow transition font-semibold ${
+                  canMerge
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                Merge PDF Files
+              </button>
+            </div>
           </div>
-
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </section>
   );
 }

@@ -43,21 +43,32 @@ export default function PageThumbnails({
   }, [pdf]);
 
   return (
-    <div className={`flex gap-4 overflow-y-auto pr-4 ${containerClassName ?? 'flex-col border-r'}`}>
+    <div
+      className={`flex gap-4 overflow-y-auto max-h-[100vh] p-4 ${
+        containerClassName ?? 'flex-col border-r border-gray-200'
+      }`}
+    >
       {thumbnails.map((src, idx) => {
         const pageNum = idx + 1;
+        const isActive = pageNum === currentPage;
+
         return (
-          <div key={pageNum} className="flex flex-col items-center gap-1">
+          <div key={pageNum} className="flex flex-col items-center gap-1 group">
             <img
               src={src}
-              onClick={() => setCurrentPage(pageNum)}
-              className={`cursor-pointer border-2 rounded-md ${
-                pageNum === currentPage ? 'border-blue-600' : 'border-transparent'
-              } hover:border-blue-400 transition`}
               alt={`Page ${pageNum}`}
+              onClick={() => setCurrentPage(pageNum)}
+              className={`cursor-pointer border-2 rounded-md shadow-sm transition-all duration-200 
+                ${
+                  isActive
+                    ? 'border-blue-600 scale-105 bg-blue-50'
+                    : 'border-gray-200 hover:border-blue-400'
+                }`}
             />
             {!limitPages && (
-              <div className="text-sm text-gray-600">Page {pageNum}</div>
+              <div className="text-sm text-gray-600 group-hover:text-gray-800">
+                Page {pageNum}
+              </div>
             )}
             {renderBelow && renderBelow(pageNum)}
           </div>

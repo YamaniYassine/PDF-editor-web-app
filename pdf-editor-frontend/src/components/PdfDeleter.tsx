@@ -59,40 +59,49 @@ export default function PdfDeleter() {
   };
 
   return (
-    <div className="min-h-screen py-12 px-4 flex flex-col items-center space-y-10" style={{ marginTop: '5%' }}>
-      <h1 className="text-4xl font-bold text-gray-800 text-center">Delete Pages from Your PDF</h1>
+    <section className="min-h-screen py-16 px-4 bg-gray-50" style={{ paddingTop: '7%' }}>
+      <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
+        <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 text-center">
+          Delete Pages from Your PDF
+        </h1>
 
-      {!file && <FileUploader onFileSelect={handleFileSelect} />}
+        {!file && <FileUploader onFileSelect={handleFileSelect} />}
 
-      {file && pdf && (
-        <div className="flex flex-col items-center gap-6 w-full max-w-4xl">
-          <PageThumbnails
-            pdf={pdf}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            containerClassName="flex-row"
-            renderBelow={(pageNum) => (
-              <button
-                onClick={() => toggleDelete(pageNum)}
-                className={`text-sm px-3 py-1 rounded-md transition ${
-                  pagesToDelete.includes(pageNum)
-                    ? 'bg-red-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-red-100'
-                }`}
-              >
-                {pagesToDelete.includes(pageNum) ? 'Undo' : 'Delete'}
-              </button>
-            )}
-          />
+        {file && pdf && (
+          <div className="flex flex-col items-center gap-10 w-full">
+            <PageThumbnails
+              pdf={pdf}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              containerClassName="flex-wrap justify-center gap-6"
+              renderBelow={(pageNum) => (
+                <button
+                  onClick={() => toggleDelete(pageNum)}
+                  className={`text-sm px-4 py-1 rounded-md transition font-medium ${
+                    pagesToDelete.includes(pageNum)
+                      ? 'bg-red-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-red-100'
+                  }`}
+                >
+                  {pagesToDelete.includes(pageNum) ? 'Undo' : 'Delete'}
+                </button>
+              )}
+            />
 
-          <button
-            onClick={handleDelete}
-            className="mt-6 px-6 py-3 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
-          >
-            Delete Selected Pages
-          </button>
-        </div>
-      )}
-    </div>
+            <button
+              onClick={handleDelete}
+              disabled={!pagesToDelete.length}
+              className={`px-8 py-3 rounded-lg shadow transition font-semibold ${
+                pagesToDelete.length
+                  ? 'bg-red-600 text-white hover:bg-red-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              Delete Selected Pages
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

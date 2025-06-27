@@ -80,7 +80,7 @@ export default function PDFCanvas({
   return (
     <div
       className="relative shadow-xl border border-gray-300 rounded overflow-hidden bg-white"
-      style={{ width: canvasRef.current?.width ?? 'auto', height: canvasRef.current?.height ?? 'auto' }}
+      style={{ minHeight: '400px', width: canvasRef.current?.width ?? 'auto', height: canvasRef.current?.height ?? 'auto' }}
     >
       <canvas ref={canvasRef} className="block" />
 

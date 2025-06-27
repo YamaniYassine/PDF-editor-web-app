@@ -73,46 +73,51 @@ export default function PdfEditor() {
   };
 
   return (
-    <div className="min-h-screen py-12 px-4 flex flex-col items-center space-y-10" style={{ marginTop: '5%' }}>
-      <h1 className="text-4xl font-bold text-gray-800 text-center">Edit Your PDF for Free</h1>
+    <section className="min-h-screen py-16 px-4 bg-gray-50" style={{ paddingTop: '7%' }}>
+      <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
+        <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 text-center">
+          Edit Your PDF for Free
+        </h1>
 
-      {!file && <FileUploader onFileSelect={handleFileSelect} />}
+        {!file && <FileUploader onFileSelect={handleFileSelect} />}
 
-      {file && pdf && (
-        <div className="flex w-full gap-4 justify-center">
-          <PageThumbnails
-            pdf={pdf}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-          />
-          <div className="flex flex-col items-center">
-            <PDFCanvas
+        {file && pdf && (
+          <div className="flex flex-col lg:flex-row w-full gap-8 justify-center items-start">
+            <PageThumbnails
               pdf={pdf}
               currentPage={currentPage}
-              scale={scale}
-              textItems={textItems}
-              pageHeight={pageHeight}
-              setPageHeight={setPageHeight}
-              activeEditIndex={activeEditIndex}
-              setActiveEditIndex={setActiveEditIndex}
-              updateText={updateText}
-            />
-
-            <Pagination
-              currentPage={currentPage}
-              numPages={numPages}
               setCurrentPage={setCurrentPage}
             />
 
-            <button
-              onClick={handleSave}
-              className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-            >
-              Save Edited PDF
-            </button>
+            <div className="flex flex-col items-center w-full">
+              <PDFCanvas
+                pdf={pdf}
+                currentPage={currentPage}
+                scale={scale}
+                textItems={textItems}
+                pageHeight={pageHeight}
+                setPageHeight={setPageHeight}
+                activeEditIndex={activeEditIndex}
+                setActiveEditIndex={setActiveEditIndex}
+                updateText={updateText}
+              />
+
+              <Pagination
+                currentPage={currentPage}
+                numPages={numPages}
+                setCurrentPage={setCurrentPage}
+              />
+
+              <button
+                onClick={handleSave}
+                className="mt-8 px-8 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+              >
+                Save Edited PDF
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </section>
   );
 }
