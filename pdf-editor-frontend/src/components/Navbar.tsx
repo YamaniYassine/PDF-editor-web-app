@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { FiMenu, FiX } from 'react-icons/fi';
 
 export default function Navbar() {
@@ -10,10 +11,17 @@ export default function Navbar() {
 
   return (
     <nav className="w-full bg-gray-50 relative z-50 shadow-sm">
-      <div className="max-w-screen-xl mx-auto w-full px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-gray-600">
-          Free PDF Editor
-        </Link>
+      <div className="max-w-screen-xl mx-auto w-full px-4 py-3 flex flex-row-reverse sm:flex-row justify-between items-center gap-4">
+
+      <a href="/" className="flex items-center space-x-2">
+        <Image
+          src="/PDF-logo-resize.png"
+          alt="PDF Editor Logo"
+          width={80}
+          height={40}
+          priority
+        />
+      </a>
 
         <button
           className="sm:hidden text-2xl text-gray-600"
@@ -51,52 +59,29 @@ export default function Navbar() {
         {/* Mobile dropdown menu version */}
         {isOpen && (
           <ul
-            className="absolute top-full right-4 mt-2 w-40 bg-gray-50 flex flex-col items-end space-y-2 text-gray-600 font-medium sm:hidden shadow-lg p-4 rounded-md
-              animate-fade-in"
-            role="menu"
-            aria-label="Mobile menu"
-          >
-            <li>
+          className="absolute top-full left-4 mt-3 w-44 bg-white border border-gray-200 rounded-xl shadow-lg sm:hidden animate-fade-in z-50"
+          role="menu"
+          aria-label="Mobile menu"
+        >
+          {[
+            { label: 'Edit', href: '/edit' },
+            { label: 'Merge', href: '/merge' },
+            { label: 'Delete Pages', href: '/delete' },
+            { label: 'Compress', href: '/compress' },
+          ].map(({ label, href }) => (
+            <li key={label}>
               <Link
-                href="/edit"
+                href={href}
                 onClick={() => setIsOpen(false)}
-                className="hover:text-gray-800 hover:font-bold transition block w-full text-right"
                 role="menuitem"
+                className="block w-full px-5 py-3 text-left text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors"
               >
-                Edit
+                {label}
               </Link>
             </li>
-            <li>
-              <Link
-                href="/merge"
-                onClick={() => setIsOpen(false)}
-                className="hover:text-gray-800 hover:font-bold transition block w-full text-right"
-                role="menuitem"
-              >
-                Merge
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/delete"
-                onClick={() => setIsOpen(false)}
-                className="hover:text-gray-800 hover:font-bold transition block w-full text-right"
-                role="menuitem"
-              >
-                Delete Pages
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/compress"
-                onClick={() => setIsOpen(false)}
-                className="hover:text-gray-800 hover:font-bold transition block w-full text-right"
-                role="menuitem"
-              >
-                Compress
-              </Link>
-            </li>
-          </ul>
+          ))}
+        </ul>
+        
         )}
       </div>
     </nav>
