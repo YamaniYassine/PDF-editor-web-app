@@ -7,6 +7,7 @@ import { saveAs } from 'file-saver';
 
 import FileUploader from './FileUploader';
 import PageThumbnails from './PageThumbnails';
+import ToolGrid from './ToolGrid'
 
 export default function PdfMerger() {
   const [files, setFiles] = useState<File[]>([]);
@@ -63,11 +64,21 @@ export default function PdfMerger() {
   return (
     <section className="min-h-screen py-16 px-4 bg-gray-50" style={{ paddingTop: '7%' }}>
       <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
-        <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 text-center">
-          Merge PDF Files
-        </h1>
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-800">
+            Merge Your PDFs
+          </h1>
+          <p className="mt-2 text-xl text-gray-600 max-w-xl mx-auto">
+            Merge two PDF Files or more in One.
+          </p>
+        </div>
 
-        <FileUploader onFileSelect={handleFilesSelect} multiple />
+        {!canMerge && (
+          <div className="w-full flex flex-col items-center gap-6">
+            <FileUploader onFileSelect={handleFilesSelect} />
+            <ToolGrid currentTool="merge" />
+          </div>
+        )}
 
         {pdfs.length > 0 && (
           <div className="w-full flex flex-col items-center space-y-8">

@@ -7,6 +7,7 @@ import { saveAs } from 'file-saver';
 
 import FileUploader from './FileUploader';
 import PageThumbnails from './PageThumbnails';
+import ToolGrid from './ToolGrid';
 
 export default function PdfDeleter() {
   const [file, setFile] = useState<File | null>(null);
@@ -61,11 +62,21 @@ export default function PdfDeleter() {
   return (
     <section className="min-h-screen py-16 px-4 bg-gray-50" style={{ paddingTop: '7%' }}>
       <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
-        <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 text-center">
-          Delete Pages from Your PDF
-        </h1>
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-800">
+            Delete PDF Pages
+          </h1>
+          <p className="mt-2 text-xl text-gray-600 max-w-xl mx-auto">
+            Delete one or multi Pages from Your PDF
+          </p>
+        </div>
 
-        {!file && <FileUploader onFileSelect={handleFileSelect} />}
+        {!file && (
+          <div className="w-full flex flex-col items-center gap-6">
+            <FileUploader onFileSelect={handleFileSelect} />
+            <ToolGrid currentTool="delete" />
+          </div>
+        )}
 
         {file && pdf && (
           <div className="flex flex-col items-center gap-10 w-full">

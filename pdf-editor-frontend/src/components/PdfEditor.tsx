@@ -8,6 +8,7 @@ import FileUploader from './FileUploader';
 import PDFCanvas from './PDFCanvas';
 import Pagination from './Pagination';
 import PageThumbnails from './PageThumbnails';
+import ToolGrid from './ToolGrid'
 import type { TextItem } from './types';
 
 export default function PdfEditor() {
@@ -75,11 +76,25 @@ export default function PdfEditor() {
   return (
     <section className="min-h-screen py-16 px-4 bg-gray-50" style={{ paddingTop: '7%' }}>
       <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
-        <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 text-center">
-          Edit Your PDF for Free
-        </h1>
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-800">
+            Edit Your PDF
+          </h1>
+          <p className="mt-2 text-xl text-gray-600 max-w-xl mx-auto">
+            Change PDF text directly in your browser.
+          </p>
+        </div>
 
-        {!file && <FileUploader onFileSelect={handleFileSelect} />}
+
+        {!file && (
+          <div className="w-full flex flex-col items-center gap-6">
+            <FileUploader onFileSelect={handleFileSelect} />
+            <ToolGrid currentTool="edit" />
+          </div>
+        )}
+
+
+
 
         {file && pdf && (
           <div className="flex flex-col lg:flex-row w-full gap-8 justify-center items-start">

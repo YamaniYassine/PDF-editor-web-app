@@ -10,7 +10,7 @@ export default function Navbar() {
   const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
-    <nav className="w-full bg-gray-50 relative z-50 shadow-sm">
+    <nav className="w-full bg-green-100/65 relative z-50 shadow-sm">
       <div className="max-w-screen-xl mx-auto w-full px-4 py-3 flex flex-row-reverse sm:flex-row justify-between items-center gap-4">
 
       <a href="/" className="flex items-center space-x-2">

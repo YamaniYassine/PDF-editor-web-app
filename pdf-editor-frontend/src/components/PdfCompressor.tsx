@@ -7,6 +7,7 @@ import type { PDFDocumentProxy } from 'pdfjs-dist';
 
 import FileUploader from './FileUploader';
 import PageThumbnails from './PageThumbnails';
+import ToolGrid from './ToolGrid'
 
 export default function PdfCompressor() {
   const [file, setFile] = useState<File | null>(null);
@@ -53,11 +54,21 @@ export default function PdfCompressor() {
   return (
     <section className="min-h-screen py-16 px-4 bg-gray-50" style={{ paddingTop: '7%' }}>
       <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
-        <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 text-center">
-          Compress Your PDF
-        </h1>
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-800">
+            Compress Your PDF
+          </h1>
+          <p className="mt-2 text-xl text-gray-600 max-w-xl mx-auto">
+            Compress Your PDF and Reduce the filesize.
+          </p>
+        </div>
 
-        {!file && <FileUploader onFileSelect={handleFileSelect} />}
+        {!file && (
+          <div className="w-full flex flex-col items-center gap-6">
+            <FileUploader onFileSelect={handleFileSelect} />
+            <ToolGrid currentTool="compress" />
+          </div>
+        )}
 
         {file && pdf && (
           <div className="flex flex-col items-center gap-8 w-full max-w-4xl">
