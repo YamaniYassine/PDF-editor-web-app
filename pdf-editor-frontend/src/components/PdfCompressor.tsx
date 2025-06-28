@@ -56,10 +56,10 @@ export default function PdfCompressor() {
       <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
         <div className="text-center space-y-2">
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-800">
-            Compress Your PDF
+            Compress Your <span className="highlight-pdf">PDF</span>
           </h1>
           <p className="mt-2 text-xl text-gray-600 max-w-xl mx-auto">
-            Compress Your PDF and Reduce the filesize.
+            Compress Your <span className="highlight-pdf">PDF</span> and Reduce the filesize.
           </p>
         </div>
 

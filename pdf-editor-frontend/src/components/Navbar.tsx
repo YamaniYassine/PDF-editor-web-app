@@ -15,7 +15,7 @@ export default function Navbar() {
 
       <a href="/" className="flex items-center space-x-2">
         <Image
-          src="/PDF-logo-resize.png"
+          src="/PDF-logo.svg"
           alt="PDF Editor Logo"
           width={80}
           height={40}
@@ -35,22 +35,22 @@ export default function Navbar() {
         {/* Desktop menu version */}
         <ul className="hidden sm:flex space-x-8 text-gray-600 font-medium">
           <li>
-            <Link href="/edit" className="hover:text-gray-800 hover:font-bold transition">
+            <Link href="/edit" className="hover:text-green-600 hover:font-bold transition">
               Edit
             </Link>
           </li>
           <li>
-            <Link href="/merge" className="hover:text-gray-800 hover:font-bold transition">
+            <Link href="/merge" className="hover:text-green-600 hover:font-bold transition">
               Merge
             </Link>
           </li>
           <li>
-            <Link href="/delete" className="hover:text-gray-800 hover:font-bold transition">
+            <Link href="/delete" className="hover:text-green-600 hover:font-bold transition">
               Delete Pages
             </Link>
           </li>
           <li>
-            <Link href="/compress" className="hover:text-gray-800 hover:font-bold transition">
+            <Link href="/compress" className="hover:text-green-600 hover:font-bold transition">
               Compress
             </Link>
           </li>

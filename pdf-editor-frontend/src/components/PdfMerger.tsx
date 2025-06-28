@@ -66,10 +66,10 @@ export default function PdfMerger() {
       <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
         <div className="text-center space-y-2">
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-800">
-            Merge Your PDFs
+            Merge Your <span className="highlight-pdf">PDFs</span>
           </h1>
           <p className="mt-2 text-xl text-gray-600 max-w-xl mx-auto">
-            Merge two PDF Files or more in One.
+            Merge two <span className="highlight-pdf">PDF</span> Files or more in One.
           </p>
         </div>
 

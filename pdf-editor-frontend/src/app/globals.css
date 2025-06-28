@@ -15,3 +15,7 @@
     animation: fadeIn 0.2s ease forwards;
   }
   
+  .highlight-pdf {
+    color: var(--color-green-600);
+    font-weight: 600; 
+  }

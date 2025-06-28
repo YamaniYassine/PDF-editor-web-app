@@ -64,10 +64,10 @@ export default function PdfDeleter() {
       <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
         <div className="text-center space-y-2">
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-800">
-            Delete PDF Pages
+            Delete <span className="highlight-pdf">PDF</span> Pages
           </h1>
           <p className="mt-2 text-xl text-gray-600 max-w-xl mx-auto">
-            Delete one or multi Pages from Your PDF
+            Delete one or multi Pages from Your <span className="highlight-pdf">PDF</span>
           </p>
         </div>
 

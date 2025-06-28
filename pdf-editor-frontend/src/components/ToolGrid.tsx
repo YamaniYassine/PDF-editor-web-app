@@ -17,7 +17,7 @@ export default function ToolGrid({ currentTool }: ToolGridProps) {
 
   return (
     <div className="mt-6 w-full max-w-4xl flex flex-col items-center">
-      <h2 className="text-3xl font-semibold text-gray-800 mb-4">Or try other PDF Tools</h2>
+      <h2 className="text-3xl font-semibold text-gray-800 mb-4">Or try other <span className="highlight-pdf">PDF</span> Tools</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full px-4">
         {tools
           .filter((tool) => tool.key !== currentTool)
