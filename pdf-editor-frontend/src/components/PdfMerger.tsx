@@ -75,7 +75,7 @@ export default function PdfMerger() {
 
         {!canMerge && (
           <div className="w-full flex flex-col items-center gap-6">
-            <FileUploader onFileSelect={handleFilesSelect} />
+            <FileUploader onFileSelect={handleFilesSelect} multiple/>
             <ToolGrid currentTool="merge" />
           </div>
         )}

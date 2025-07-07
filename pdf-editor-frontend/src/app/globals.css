@@ -19,3 +19,9 @@
     color: var(--color-green-600);
     font-weight: 600; 
   }
+
+  /* #__next-build-watcher,
+nextjs-portal,
+iframe#__nextjs-dev-overlay {
+  display: none !important;
+} */
