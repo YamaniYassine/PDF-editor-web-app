@@ -216,11 +216,6 @@ npm run dev  # accessible sur http://localhost:3000
 
 - Si ce projet t’a été utile, un ⭐️ sur le repo serait grandement apprécié !
 
-```yaml
-Tu peux copier ce contenu directement dans ton **README.md** sur GitHub. Si tu souhaites aussi la version PDF ou en anglais, n’hésite pas à me le dire, je te l’adapte de suite !
-::contentReference[oaicite:0]{index=0}
-```
-
 
 
 # if needed
