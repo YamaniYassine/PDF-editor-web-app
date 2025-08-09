@@ -206,7 +206,7 @@ npm run dev  # accessible sur http://localhost:3000
 
 ## 8. Licence
 
-- MIT License © 2025 [YAMANI Yassine]
+- MIT License © 2025 - YAMANI Yassine
 
 ## 9. Contribution
 
