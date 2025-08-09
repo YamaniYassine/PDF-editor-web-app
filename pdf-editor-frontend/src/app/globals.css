@@ -20,8 +20,8 @@
     font-weight: 600; 
   }
 
-  /* #__next-build-watcher,
+  #__next-build-watcher,
 nextjs-portal,
 iframe#__nextjs-dev-overlay {
   display: none !important;
-} */
+}
