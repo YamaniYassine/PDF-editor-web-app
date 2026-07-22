@@ -19,6 +19,10 @@ export default function PdfEditor() {
   const [textItems, setTextItems] = useState<TextItem[]>([]);
   const [pageHeight, setPageHeight] = useState(0);
   const [activeEditIndex, setActiveEditIndex] = useState<number | null>(null);
+  const [isPdfJsReady, setIsPdfJsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const pdfjsLibRef = useRef<any>(null);
 
   const scale = 1.5;
@@ -31,6 +35,7 @@ export default function PdfEditor() {
         import.meta.url
       ).toString();
       pdfjsLibRef.current = pdfjsLib;
+      setIsPdfJsReady(true);
     };
 
     loadPdfJs();
@@ -38,31 +43,49 @@ export default function PdfEditor() {
 
   const handleFileSelect = async (pdfFileOrFiles: File | File[]) => {
     const pdfFile = Array.isArray(pdfFileOrFiles) ? pdfFileOrFiles[0] : pdfFileOrFiles;
-    setFile(pdfFile);
-    const data = await pdfFile.arrayBuffer();
+    if (!pdfjsLibRef.current) {
+      setError('The PDF editor is still loading. Please choose your file again in a moment.');
+      return;
+    }
 
-    if (!pdfjsLibRef.current) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await pdfFile.arrayBuffer();
+      const loadedPdf = await pdfjsLibRef.current.getDocument({ data }).promise;
+      const form = new FormData();
+      form.append('file', pdfFile);
+      const resp = await axios.post('http://localhost:8000/api/extract', form);
 
-    const loadedPdf = await pdfjsLibRef.current.getDocument({ data }).promise;
-    setPdf(loadedPdf);
-    setNumPages(loadedPdf.numPages);
-    setCurrentPage(1);
-
-    const form = new FormData();
-    form.append('file', pdfFile);
-    const resp = await axios.post('http://localhost:8000/api/extract', form);
-    setTextItems(resp.data.items);
+      setFile(pdfFile);
+      setPdf(loadedPdf);
+      setNumPages(loadedPdf.numPages);
+      setCurrentPage(1);
+      setTextItems(resp.data.items);
+    } catch {
+      setError('We could not open this PDF. Please try another PDF file.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSave = async () => {
     if (!file) return;
+    setIsSaving(true);
+    setError(null);
     const form = new FormData();
     form.append('file', file);
     form.append('edits', JSON.stringify(textItems));
-    const resp = await axios.post('http://localhost:8000/api/replace', form, {
-      responseType: 'blob',
-    });
-    saveAs(resp.data, 'edited.pdf');
+    try {
+      const resp = await axios.post('http://localhost:8000/api/replace', form, {
+        responseType: 'blob',
+      });
+      saveAs(resp.data, 'edited.pdf');
+    } catch {
+      setError('Your edited PDF could not be saved. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const updateText = (idx: number, newText: string) => {
@@ -89,6 +112,9 @@ export default function PdfEditor() {
         {!file && (
           <div className="w-full flex flex-col items-center gap-6">
             <FileUploader onFileSelect={handleFileSelect} />
+            {!isPdfJsReady && <p className="text-sm text-gray-500">Preparing the editor…</p>}
+            {isLoading && <p className="text-sm text-gray-500">Opening your PDF…</p>}
+            {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
             <ToolGrid currentTool="edit" />
           </div>
         )}
@@ -125,10 +151,12 @@ export default function PdfEditor() {
 
               <button
                 onClick={handleSave}
+                disabled={isSaving}
                 className="mt-8 px-8 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
               >
-                Save Edited PDF
+                {isSaving ? 'Saving…' : 'Save Edited PDF'}
               </button>
+              {error && <p role="alert" className="mt-4 text-sm text-red-600">{error}</p>}
             </div>
           </div>
         )}

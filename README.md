@@ -147,7 +147,7 @@ Composants principaux (`src/components/`) :
 
 ```bash
 cd pdf-editor-backend/
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # ou venv\Scripts\activate sur Windows
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000

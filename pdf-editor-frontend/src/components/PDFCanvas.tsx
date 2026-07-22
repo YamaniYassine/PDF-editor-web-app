@@ -89,50 +89,74 @@ export default function PDFCanvas({
         .filter((t) => t.page_number === correctedPage)
         .map(({ idx, ...it }) => {
           const x = it.x * scale;
-          const y = pageHeight - it.y * scale - it.font_size * scale * 1.3;
+          const y = it.y * scale;
           const isEditing = activeEditIndex === idx;
+          const hasChanged = it.text !== it.original_text;
 
           return (
             <div
               key={idx}
-              suppressContentEditableWarning
-              contentEditable={isEditing}
               onClick={() => setActiveEditIndex(idx)}
-              onBlur={(e) => {
-                updateText(idx, e.currentTarget.textContent || '');
-                setActiveEditIndex(null);
-              }}
               className="absolute"
               style={{
                 top: y,
                 left: x,
                 fontSize: it.font_size * scale,
-                width: it.width * scale,
+                minWidth: Math.max(it.width * scale, it.font_size * scale * 2),
+                height: Math.max(it.height * scale, it.font_size * scale * 1.25),
                 fontWeight: it.is_bold ? 'bold' : 'normal',
                 fontStyle: it.is_italic ? 'italic' : 'normal',
                 fontFamily: 'Helvetica, sans-serif',
                 whiteSpace: 'nowrap',
                 userSelect: 'text',
                 cursor: isEditing ? 'text' : 'pointer',
-                opacity: isEditing ? 1 : 0,
-                backgroundColor: isEditing ? 'white' : 'transparent',
                 zIndex: isEditing ? 10 : 2,
-                transition: 'opacity 0.15s',
+                border: isEditing ? '2px solid rgb(37 99 235)' : '2px solid transparent',
+                borderRadius: 2,
+                backgroundColor: hasChanged && !isEditing ? 'white' : 'transparent',
+                boxShadow: hasChanged && !isEditing ? '0 0 2px 2px white' : 'none',
+                transition: 'border-color 0.15s, background-color 0.15s',
               }}
               onMouseEnter={(e) => {
                 if (!isEditing) {
-                  e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.9)';
+                  e.currentTarget.style.borderColor = 'rgb(37 99 235)';
+                  if (!hasChanged) e.currentTarget.style.backgroundColor = 'rgba(219, 234, 254, 0.35)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isEditing) {
-                  e.currentTarget.style.opacity = '0';
-                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = 'transparent';
+                  if (!hasChanged) e.currentTarget.style.backgroundColor = 'transparent';
                 }
               }}
             >
-              {it.text}
+              {isEditing && (
+                <input
+                  autoFocus
+                  aria-label="Edit PDF text"
+                  value={it.text}
+                  onChange={(event) => updateText(idx, event.target.value)}
+                  onBlur={() => setActiveEditIndex(null)}
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') event.currentTarget.blur();
+                  }}
+                  className="block h-full min-w-full border-0 bg-white px-1 outline-none shadow-lg"
+                  style={{
+                    font: 'inherit',
+                    color: `rgb(${it.color.map((channel) => Math.round(channel * 255)).join(', ')})`,
+                    width: Math.max(it.width * scale, it.font_size * scale * 2),
+                  }}
+                />
+              )}
+              {!isEditing && hasChanged && (
+                <span
+                  className="block h-full whitespace-nowrap bg-white px-px"
+                  style={{ color: `rgb(${it.color.map((channel) => Math.round(channel * 255)).join(', ')})` }}
+                >
+                  {it.text}
+                </span>
+              )}
             </div>
           );
         })}
