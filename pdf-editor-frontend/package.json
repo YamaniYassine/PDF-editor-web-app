@@ -12,7 +12,7 @@
     "axios": "^1.9.0",
     "file-saver": "^2.0.5",
     "formidable": "^3.5.4",
-    "next": "15.3.1",
+    "next": "15.3.8",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^5.3.31",
     "postcss": "^8.5.3",
