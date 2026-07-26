@@ -5,17 +5,32 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from utils import extract_text_items, replace_text_and_generate, merge_pdfs_bytes, delete_pages_from_pdf, compress_pdf_with_qpdf
 import io
+import os
 
 app = FastAPI()
 
-# Allow frontend to connect
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000",
+    ).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 
 @app.post("/api/extract")
 async def extract(file: UploadFile = File(...)):

@@ -15,7 +15,7 @@ export default function Hero() {
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
           <Link href="/edit">
             <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-lg shadow transition">
-              Edit a PDF – it's free
+              Edit a PDF – it&apos;s free
             </button>
           </Link>
           <Link href="/merge">

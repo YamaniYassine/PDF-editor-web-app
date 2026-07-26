@@ -9,6 +9,7 @@ import { FiMenu, FiPlus, FiTrash2 } from 'react-icons/fi';
 import FileUploader from './FileUploader';
 import PageThumbnails from './PageThumbnails';
 import ToolGrid from './ToolGrid';
+import { API_BASE_URL } from '../lib/api';
 
 interface MergeFile {
   id: string;
@@ -23,7 +24,7 @@ export default function PdfMerger() {
   const [isLoading, setIsLoading] = useState(false);
   const [isMerging, setIsMerging] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const pdfjsLibRef = useRef<any>(null);
+  const pdfjsLibRef = useRef<typeof import('pdfjs-dist/webpack.mjs') | null>(null);
   const addFilesInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -100,7 +101,7 @@ export default function PdfMerger() {
     setIsMerging(true);
     setError(null);
     try {
-      const response = await axios.post('http://localhost:8000/api/merge', form, {
+      const response = await axios.post(`${API_BASE_URL}/api/merge`, form, {
         responseType: 'blob',
       });
       saveAs(response.data, 'merged.pdf');

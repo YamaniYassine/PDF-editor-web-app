@@ -8,6 +8,7 @@ import type { PDFDocumentProxy } from 'pdfjs-dist';
 import FileUploader from './FileUploader';
 import PageThumbnails from './PageThumbnails';
 import ToolGrid from './ToolGrid';
+import { API_BASE_URL } from '../lib/api';
 
 interface CompressionResult {
   blob: Blob;
@@ -30,7 +31,7 @@ export default function PdfCompressor() {
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<CompressionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const pdfjsLibRef = useRef<any>(null);
+  const pdfjsLibRef = useRef<typeof import('pdfjs-dist/webpack.mjs') | null>(null);
   const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -100,7 +101,7 @@ export default function PdfCompressor() {
     form.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/compress', form, {
+      const response = await axios.post(`${API_BASE_URL}/api/compress`, form, {
         responseType: 'blob',
         onUploadProgress: (event) => {
           const total = event.total;

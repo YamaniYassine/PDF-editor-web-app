@@ -10,6 +10,7 @@ import Pagination from './Pagination';
 import PageThumbnails from './PageThumbnails';
 import ToolGrid from './ToolGrid'
 import type { TextItem } from './types';
+import { API_BASE_URL } from '../lib/api';
 
 export default function PdfEditor() {
   const [file, setFile] = useState<File | null>(null);
@@ -17,14 +18,13 @@ export default function PdfEditor() {
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [textItems, setTextItems] = useState<TextItem[]>([]);
-  const [pageHeight, setPageHeight] = useState(0);
   const [activeEditIndex, setActiveEditIndex] = useState<number | null>(null);
   const [isPdfJsReady, setIsPdfJsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fallbackItemCount, setFallbackItemCount] = useState(0);
-  const pdfjsLibRef = useRef<any>(null);
+  const pdfjsLibRef = useRef<typeof import('pdfjs-dist/webpack.mjs') | null>(null);
 
   const scale = 1.5;
 
@@ -56,7 +56,7 @@ export default function PdfEditor() {
       const loadedPdf = await pdfjsLibRef.current.getDocument({ data }).promise;
       const form = new FormData();
       form.append('file', pdfFile);
-      const resp = await axios.post('http://localhost:8000/api/extract', form);
+      const resp = await axios.post(`${API_BASE_URL}/api/extract`, form);
 
       setFile(pdfFile);
       setPdf(loadedPdf);
@@ -79,7 +79,7 @@ export default function PdfEditor() {
     form.append('file', file);
     form.append('edits', JSON.stringify(textItems));
     try {
-      const resp = await axios.post('http://localhost:8000/api/replace', form, {
+      const resp = await axios.post(`${API_BASE_URL}/api/replace`, form, {
         responseType: 'blob',
       });
       saveAs(resp.data, 'edited.pdf');
@@ -147,8 +147,6 @@ export default function PdfEditor() {
                 currentPage={currentPage}
                 scale={scale}
                 textItems={textItems}
-                pageHeight={pageHeight}
-                setPageHeight={setPageHeight}
                 activeEditIndex={activeEditIndex}
                 setActiveEditIndex={setActiveEditIndex}
                 updateText={updateText}

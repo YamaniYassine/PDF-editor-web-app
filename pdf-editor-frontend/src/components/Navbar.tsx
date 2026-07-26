@@ -13,7 +13,7 @@ export default function Navbar() {
     <nav className="w-full bg-green-100/65 relative z-50 shadow-sm">
       <div className="max-w-screen-xl mx-auto w-full px-4 py-3 flex flex-row-reverse sm:flex-row justify-between items-center gap-4">
 
-      <a href="/" className="flex items-center space-x-2">
+      <Link href="/" className="flex items-center space-x-2">
         <Image
           src="/PDF-logo.svg"
           alt="PDF Editor Logo"
@@ -21,7 +21,7 @@ export default function Navbar() {
           height={40}
           priority
         />
-      </a>
+      </Link>
 
         <button
           className="sm:hidden text-2xl text-gray-600"

@@ -8,8 +8,6 @@ interface PDFCanvasProps {
   currentPage: number;
   scale: number;
   textItems: TextItem[];
-  pageHeight: number;
-  setPageHeight: (h: number) => void;
   activeEditIndex: number | null;
   setActiveEditIndex: (i: number | null) => void;
   updateText: (idx: number, text: string) => void;
@@ -20,8 +18,6 @@ export default function PDFCanvas({
   currentPage,
   scale,
   textItems,
-  pageHeight,
-  setPageHeight,
   activeEditIndex,
   setActiveEditIndex,
   updateText,
@@ -43,7 +39,6 @@ export default function PDFCanvas({
       }
 
       const viewport = page.getViewport({ scale });
-      setPageHeight(viewport.height);
 
       const canvas = canvasRef.current!;
       canvas.width = viewport.width;
@@ -58,8 +53,8 @@ export default function PDFCanvas({
       try {
         await renderTask.promise;
         if (canceled) return;
-      } catch (err: any) {
-        if (err.name !== 'RenderingCancelledException') {
+      } catch (err: unknown) {
+        if (!(err instanceof Error) || err.name !== 'RenderingCancelledException') {
           console.error('PDF render error:', err);
         }
       } finally {
@@ -73,7 +68,7 @@ export default function PDFCanvas({
         renderTaskRef.current.cancel();
       }
     };
-  }, [pdf, currentPage, scale, setPageHeight]);
+  }, [pdf, currentPage, scale]);
 
   const correctedPage = currentPage - 1;
 

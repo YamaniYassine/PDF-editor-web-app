@@ -8,13 +8,14 @@ import { saveAs } from 'file-saver';
 import FileUploader from './FileUploader';
 import PageThumbnails from './PageThumbnails';
 import ToolGrid from './ToolGrid';
+import { API_BASE_URL } from '../lib/api';
 
 export default function PdfDeleter() {
   const [file, setFile] = useState<File | null>(null);
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagesToDelete, setPagesToDelete] = useState<number[]>([]);
-  const pdfjsLibRef = useRef<any>(null);
+  const pdfjsLibRef = useRef<typeof import('pdfjs-dist/webpack.mjs') | null>(null);
 
   useEffect(() => {
     const loadPdfJs = async () => {
@@ -52,7 +53,7 @@ export default function PdfDeleter() {
     form.append('file', file);
     form.append('pages_to_delete', JSON.stringify(pagesToDelete));
 
-    const resp = await axios.post('http://localhost:8000/api/delete-pages', form, {
+    const resp = await axios.post(`${API_BASE_URL}/api/delete-pages`, form, {
       responseType: 'blob',
     });
 
