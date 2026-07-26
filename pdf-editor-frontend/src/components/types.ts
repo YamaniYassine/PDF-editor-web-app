@@ -11,5 +11,6 @@ export interface TextItem {
     is_bold: boolean;
     is_italic: boolean;
     color: [number, number, number];
+    edit_mode: 'content' | 'fallback';
     page_number: number;
 }

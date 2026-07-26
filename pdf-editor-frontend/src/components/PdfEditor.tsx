@@ -23,6 +23,7 @@ export default function PdfEditor() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fallbackItemCount, setFallbackItemCount] = useState(0);
   const pdfjsLibRef = useRef<any>(null);
 
   const scale = 1.5;
@@ -62,6 +63,7 @@ export default function PdfEditor() {
       setNumPages(loadedPdf.numPages);
       setCurrentPage(1);
       setTextItems(resp.data.items);
+      setFallbackItemCount(resp.data.editing?.fallback_items ?? 0);
     } catch {
       setError('We could not open this PDF. Please try another PDF file.');
     } finally {
@@ -81,8 +83,17 @@ export default function PdfEditor() {
         responseType: 'blob',
       });
       saveAs(resp.data, 'edited.pdf');
-    } catch {
-      setError('Your edited PDF could not be saved. Please try again.');
+    } catch (error) {
+      let message = 'Your edited PDF could not be saved. Please try again.';
+      if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
+        try {
+          const body = JSON.parse(await error.response.data.text());
+          if (typeof body.detail === 'string') message = body.detail;
+        } catch {
+          // Keep the user-friendly fallback for a non-JSON error response.
+        }
+      }
+      setError(message);
     } finally {
       setIsSaving(false);
     }
@@ -157,6 +168,11 @@ export default function PdfEditor() {
                 {isSaving ? 'Saving…' : 'Save Edited PDF'}
               </button>
               {error && <p role="alert" className="mt-4 text-sm text-red-600">{error}</p>}
+              {fallbackItemCount > 0 && (
+                <p className="mt-3 text-sm text-amber-700">
+                  Some text uses a visual fallback with a locally matched background colour.
+                </p>
+              )}
             </div>
           </div>
         )}

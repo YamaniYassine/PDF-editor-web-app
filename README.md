@@ -5,10 +5,10 @@
 L’**Éditeur PDF Web** est une application complète permettant de **modifier, fusionner, supprimer et compresser** des fichiers PDF en ligne, sans installation logicielle.
 
 - **Backend** : API FastAPI (Python) responsable du traitement des PDFs.
-- **Frontend** : Application Next.js 14 (React/TypeScript) avec une interface moderne et intuitive.
+- **Frontend** : Application Next.js 15 (React/TypeScript) avec une interface moderne et intuitive.
 
 **Public cible** : utilisateurs recherchant des outils PDF rapides et efficaces en ligne.  
-**Technologies principales** : Next.js 14, Tailwind CSS, TypeScript, Python, FastAPI, PyMuPDF, qpdf, PDF.js.
+**Technologies principales** : Next.js 15, Tailwind CSS, TypeScript, Python, FastAPI, PyMuPDF, qpdf, PDF.js.
 
 
 ### Structure du projet
@@ -46,16 +46,16 @@ L’**Éditeur PDF Web** est une application complète permettant de **modifier,
 ## 2. Fonctionnalités clés
 
 - **Édition de texte en place**  
-  Extraction précise du texte avec position et style, édition directe dans le navigateur, style conservé, multi-pages supporté.
+  Extraction précise du texte avec position et style, édition directe dans le navigateur et support multi-pages. Les structures PDF courantes sont modifiées directement ; les autres utilisent un remplacement visuel avec couleur de fond locale.
 
 - **Fusion de PDFs**  
-  Combine plusieurs fichiers en un seul, dans l'ordre d'envoi.
+  Combine plusieurs fichiers en un seul, avec ajout, suppression et réorganisation par glisser-déposer.
 
 - **Suppression de pages**  
-  Sélection visuelle de pages à supprimer. Numérotation base-0.
+  Sélection visuelle de pages à supprimer. Les pages sont numérotées à partir de 1 dans l’interface.
 
 - **Compression de PDF**  
-  Réduction du poids des fichiers via `qpdf`, optimisation sans perte visuelle notable.
+  Optimisation via `qpdf`, avec affichage des tailles avant/après et du gain réel. Selon le PDF, le fichier peut parfois ne pas diminuer.
 
 - **Performance**  
   Rendu optimisé via PDF.js, traitement en mémoire côté client, chargement lazy des composants.
@@ -96,7 +96,7 @@ Fonctions utilitaires (`utils.py`) :
 
 Technologies utilisées :
 
-- Next.js 14 (App Router)
+- Next.js 15 (App Router)
 - TypeScript
 - Tailwind CSS
 - PDF.js
@@ -172,11 +172,11 @@ npm run dev  # accessible sur http://localhost:3000
 
 ## 6. Points techniques importants
 
-- Coordonnées : conversion PyMuPDF (orig bottom-left) ↔ PDF.js (top-left) : y_converted = page_height - y_original.
+- Coordonnées : PyMuPDF et PDF.js utilisent les coordonnées de rendu avec origine en haut à gauche dans cette application.
 
 - Typage TS : défini dans types.ts.
 
-- Sécurité : validation des fichiers, CORS en mode dev, aucun stockage serveur.
+- Sécurité : aucun stockage serveur ; CORS est actuellement ouvert pour le développement. Une validation renforcée des fichiers reste à ajouter avant un déploiement public.
 
 - Gestion d’erreurs : try/catch sur toutes les opérations.
 

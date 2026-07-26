@@ -4,15 +4,27 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
+import { FiMenu, FiPlus, FiTrash2 } from 'react-icons/fi';
 
 import FileUploader from './FileUploader';
 import PageThumbnails from './PageThumbnails';
-import ToolGrid from './ToolGrid'
+import ToolGrid from './ToolGrid';
+
+interface MergeFile {
+  id: string;
+  file: File;
+  pdf: PDFDocumentProxy;
+}
 
 export default function PdfMerger() {
-  const [files, setFiles] = useState<File[]>([]);
-  const [pdfs, setPdfs] = useState<PDFDocumentProxy[]>([]);
+  const [mergeFiles, setMergeFiles] = useState<MergeFile[]>([]);
+  const [draggedFileId, setDraggedFileId] = useState<string | null>(null);
+  const [dragOverFileId, setDragOverFileId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMerging, setIsMerging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const pdfjsLibRef = useRef<any>(null);
+  const addFilesInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const loadPdfJs = async () => {
@@ -29,91 +41,202 @@ export default function PdfMerger() {
 
   const handleFilesSelect = async (newFiles: File | File[]) => {
     const selectedFiles = Array.isArray(newFiles) ? newFiles : [newFiles];
-
-    const loadedPdfs: PDFDocumentProxy[] = [];
-    for (const file of selectedFiles) {
-      const data = await file.arrayBuffer();
-      const pdf = await pdfjsLibRef.current.getDocument({ data }).promise;
-      loadedPdfs.push(pdf);
+    if (!pdfjsLibRef.current) {
+      setError('The merger is still loading. Please choose your files again in a moment.');
+      return;
     }
 
-    setFiles((prev) => [...prev, ...selectedFiles]);
-    setPdfs((prev) => [...prev, ...loadedPdfs]);
+    setError(null);
+    setIsLoading(true);
+    try {
+      const loadedFiles = await Promise.all(
+        selectedFiles.map(async (file) => {
+          const data = await file.arrayBuffer();
+          const pdf = await pdfjsLibRef.current.getDocument({ data }).promise;
+          return {
+            id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
+            file,
+            pdf,
+          };
+        })
+      );
+      setMergeFiles((previous) => [...previous, ...loadedFiles]);
+    } catch {
+      setError('One or more files could not be opened. Please use valid PDF files.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const removeFile = (id: string) => {
+    setMergeFiles((previous) => {
+      const removed = previous.find((entry) => entry.id === id);
+      void removed?.pdf.destroy();
+      return previous.filter((entry) => entry.id !== id);
+    });
+  };
+
+  const moveFile = (targetId: string) => {
+    if (!draggedFileId || draggedFileId === targetId || dragOverFileId === targetId) return;
+
+    setDragOverFileId(targetId);
+    setMergeFiles((previous) => {
+      const fromIndex = previous.findIndex((entry) => entry.id === draggedFileId);
+      const toIndex = previous.findIndex((entry) => entry.id === targetId);
+      if (fromIndex === -1 || toIndex === -1) return previous;
+      const reordered = [...previous];
+      const [moved] = reordered.splice(fromIndex, 1);
+      reordered.splice(toIndex, 0, moved);
+      return reordered;
+    });
   };
 
   const handleMerge = async () => {
-    if (files.length < 2) return;
+    if (mergeFiles.length < 2) return;
 
     const form = new FormData();
-    files.forEach((file) => form.append('files', file));
+    mergeFiles.forEach(({ file }) => form.append('files', file));
 
+    setIsMerging(true);
+    setError(null);
     try {
       const response = await axios.post('http://localhost:8000/api/merge', form, {
         responseType: 'blob',
       });
-
       saveAs(response.data, 'merged.pdf');
-    } catch (error) {
-      console.error('Merge failed:', error);
-      alert('Failed to merge PDFs');
+    } catch {
+      setError('Your PDFs could not be merged. Please try again.');
+    } finally {
+      setIsMerging(false);
     }
   };
 
-  const canMerge = files.length >= 2;
+  const canMerge = mergeFiles.length >= 2;
 
   return (
-    <section className="min-h-screen py-16 px-4 bg-gray-50" style={{ paddingTop: '7%' }}>
-      <div className="max-w-screen-xl mx-auto flex flex-col items-center space-y-12">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-800">
+    <section className="min-h-screen bg-gray-50 px-4 py-16" style={{ paddingTop: '7%' }}>
+      <div className="mx-auto flex max-w-screen-xl flex-col items-center space-y-10">
+        <div className="space-y-2 text-center">
+          <h1 className="text-4xl font-bold text-gray-800 sm:text-5xl">
             Merge Your <span className="highlight-pdf">PDFs</span>
           </h1>
-          <p className="mt-2 text-xl text-gray-600 max-w-xl mx-auto">
-            Merge two <span className="highlight-pdf">PDF</span> Files or more in One.
+          <p className="mx-auto mt-2 max-w-xl text-xl text-gray-600">
+            Put your PDF files in the order you want, then merge them into one.
           </p>
         </div>
 
-        {!canMerge && (
-          <div className="w-full flex flex-col items-center gap-6">
-            <FileUploader onFileSelect={handleFilesSelect} multiple/>
-            <ToolGrid currentTool="merge" />
+        {mergeFiles.length === 0 ? (
+          <div className="flex w-full flex-col items-center gap-3">
+            <FileUploader onFileSelect={handleFilesSelect} multiple />
+            {isLoading && <p className="text-sm text-gray-500">Opening your PDFs…</p>}
           </div>
-        )}
-
-        {pdfs.length > 0 && (
-          <div className="w-full flex flex-col items-center space-y-8">
-            <div className="flex flex-wrap justify-center gap-6 w-full max-w-full overflow-x-auto">
-              {pdfs.map((pdf, idx) => (
-                <div key={idx} className="flex flex-col items-center gap-2">
-                  <h3 className="text-sm font-semibold text-gray-600">PDF {idx + 1}</h3>
+        ) : (
+          <div className="w-full">
+            <div className="w-full overflow-x-auto pb-4">
+              <div className="flex w-max min-w-full justify-center gap-4">
+              {mergeFiles.map(({ id, file, pdf }, index) => (
+                <div
+                  key={id}
+                  draggable
+                  onDragStart={(event) => {
+                    setDraggedFileId(id);
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', id);
+                  }}
+                  onDragEnter={(event) => {
+                    event.preventDefault();
+                    moveFile(id);
+                  }}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    setDraggedFileId(null);
+                    setDragOverFileId(null);
+                  }}
+                  onDragEnd={() => {
+                    setDraggedFileId(null);
+                    setDragOverFileId(null);
+                  }}
+                  className={`relative flex w-48 shrink-0 cursor-grab flex-col items-center rounded-xl border bg-gray-50 p-3 transition-all duration-200 active:cursor-grabbing ${
+                    draggedFileId === id
+                      ? 'border-green-500 opacity-50'
+                      : dragOverFileId === id
+                        ? 'border-green-500 shadow-md ring-2 ring-green-100'
+                        : 'border-gray-200 hover:border-green-400 hover:shadow-md'
+                  }`}
+                >
+                  {dragOverFileId === id && draggedFileId !== id && (
+                    <span className="absolute -left-2 top-4 h-12 w-1 rounded-full bg-green-500" aria-hidden="true" />
+                  )}
+                  <div className="mb-2 flex w-full items-center justify-between gap-2">
+                    <span className="flex items-center text-sm font-semibold text-gray-700">
+                      <FiMenu className="mr-1 text-gray-400" aria-hidden="true" />
+                      PDF {index + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(id)}
+                      className="rounded p-1 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+                      aria-label={`Remove ${file.name}`}
+                      title="Remove PDF"
+                    >
+                      <FiTrash2 aria-hidden="true" />
+                    </button>
+                  </div>
                   <PageThumbnails
                     pdf={pdf}
                     currentPage={1}
                     setCurrentPage={() => {}}
-                    containerClassName="flex-col"
+                    containerClassName="flex-col overflow-visible p-0 max-h-none"
                     limitPages={1}
                   />
+                  <p className="mt-2 w-full truncate text-center text-xs text-gray-500" title={file.name}>{file.name}</p>
                 </div>
               ))}
+
+              <button
+                type="button"
+                onClick={() => addFilesInputRef.current?.click()}
+                className="flex min-h-64 w-48 shrink-0 flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-white p-4 text-gray-500 transition hover:border-green-500 hover:bg-green-50 hover:text-green-700"
+              >
+                <FiPlus className="mb-2 text-3xl" aria-hidden="true" />
+                <span className="text-center font-medium">Add another PDF</span>
+              </button>
+              </div>
             </div>
 
-            <div
-              title={!canMerge ? 'Please upload at least 2 PDF files to merge' : ''}
-            >
+            <input
+              ref={addFilesInputRef}
+              type="file"
+              accept="application/pdf"
+              multiple
+              className="hidden"
+              onChange={(event) => {
+                if (event.target.files?.length) handleFilesSelect(Array.from(event.target.files));
+                event.target.value = '';
+              }}
+            />
+
+            <div className="mt-5 flex flex-col items-center gap-3">
               <button
+                type="button"
                 onClick={handleMerge}
-                disabled={!canMerge}
-                className={`mt-4 px-8 py-3 rounded-lg shadow transition font-semibold ${
-                  canMerge
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                disabled={!canMerge || isMerging}
+                title={!canMerge ? 'Add at least two PDFs to merge' : ''}
+                className={`rounded-lg px-8 py-3 font-semibold text-white shadow transition ${
+                  canMerge && !isMerging ? 'bg-green-600 hover:bg-green-700' : 'cursor-not-allowed bg-gray-300 text-gray-500'
                 }`}
               >
-                Merge PDF Files
+                {isMerging ? 'Merging PDFs…' : 'Merge PDF Files'}
               </button>
+              {!canMerge && <p className="text-sm text-gray-500">Add one more PDF to enable merging.</p>}
             </div>
           </div>
         )}
+
+        {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+
+        <ToolGrid currentTool="merge" />
       </div>
     </section>
   );

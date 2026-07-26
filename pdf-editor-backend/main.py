@@ -23,7 +23,18 @@ async def extract(file: UploadFile = File(...)):
     try:
         pdf_bytes = await file.read()
         items = extract_text_items(pdf_bytes)
-        return JSONResponse({"items": items})
+        direct_items = sum(item["edit_mode"] == "content" for item in items)
+        return JSONResponse({
+            "items": items,
+            "editing": {
+                "content_items": direct_items,
+                "fallback_items": len(items) - direct_items,
+            },
+        })
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -48,6 +59,10 @@ async def replace(
         # Process PDF with multi-page edits
         new_pdf = replace_text_and_generate(pdf_bytes, edits_list)
 
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
